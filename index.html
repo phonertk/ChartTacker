@@ -3,821 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบติดตาม Chart คนไข้</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Chart Tracker</title>
+
 <style>
-  :root {
-    --bg: #0f1923;
-    --surface: #16202c;
-    --surface2: #1e2d3d;
-    --border: #2a3f52;
-    --accent: #00c8a0;
-    --accent2: #0096ff;
-    --warn: #f59e0b;
-    --danger: #ef4444;
-    --text: #e2eaf2;
-    --text-muted: #6b8299;
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-    --radius: 12px;
-  }
+body{font-family:sans-serif;background:#0f1923;color:#fff;padding:20px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+td,th{border-bottom:1px solid #333;padding:10px}
+button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer}
+.delete{background:#ef444422;color:#ef4444}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Sarabun', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* HEADER */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  .logo h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
-  .logo span { font-size: 11px; color: var(--text-muted); }
-  .header-time {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--accent);
-    background: rgba(0,200,160,0.08);
-    padding: 6px 14px;
-    border-radius: 6px;
-    border: 1px solid rgba(0,200,160,0.2);
-  }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    padding: 16px 28px 0;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .tab {
-    padding: 10px 20px;
-    border-radius: 8px 8px 0 0;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    transition: all 0.2s;
-  }
-  .tab:hover { color: var(--text); background: var(--surface2); }
-  .tab.active {
-    background: var(--bg);
-    color: var(--accent);
-    border: 1px solid var(--border);
-    border-bottom: 1px solid var(--bg);
-  }
-
-  /* MAIN */
-  main { padding: 24px 28px; max-width: 1400px; margin: 0 auto; }
-
-  /* DASHBOARD */
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--card-color, var(--accent));
-  }
-  .stat-card:hover {
-    border-color: var(--card-color, var(--accent));
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-  }
-  .stat-card.active-filter {
-    border-color: var(--card-color, var(--accent));
-    background: rgba(255,255,255,0.03);
-  }
-  .stat-icon { font-size: 24px; margin-bottom: 10px; }
-  .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-num {
-    font-size: 36px;
-    font-weight: 700;
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--card-color, var(--accent));
-    line-height: 1;
-  }
-  .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
-
-  /* SEARCH BAR */
-  .search-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .search-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  .search-input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 14px;
-    color: var(--text);
-    font-family: 'Sarabun', sans-serif;
-    transition: border-color 0.2s;
-  }
-  .search-input:focus { outline: none; border-color: var(--accent); }
-  .search-input::placeholder { color: var(--text-muted); }
-  .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    font-family: 'Sarabun', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .btn-primary { background: var(--accent); color: #0f1923; }
-  .btn-primary:hover { background: #00e6b8; }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .btn-secondary:hover { border-color: var(--accent); }
-  .btn-danger { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-  .btn-warning { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
-
-  /* TABLE */
-  .table-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .table-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .table-title { font-size: 15px; font-weight: 600; }
-  .table-count { font-size: 12px; color: var(--text-muted); }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.1);
-  }
-  td {
-    padding: 13px 16px;
-    font-size: 14px;
-    border-bottom: 1px solid rgba(42,63,82,0.5);
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
-
-  .hn { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent2); }
-  .timestamp { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-muted); }
-
-  /* ACTION BUTTONS */
-  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-  .action-btn {
-    padding: 5px 10px;
-    border-radius: 6px;
-    border: 1px solid;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Sarabun', sans-serif;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .action-btn:hover { transform: scale(1.04); }
-
-  /* MODAL */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    width: 520px;
-    max-width: 95vw;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-    animation: slideUp 0.2s ease;
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-  .form-group { margin-bottom: 16px; }
-  .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
-  .form-input, .form-select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 14px;
-    color: var(--text);
-    font-family: 'Sarabun', sans-serif;
-    transition: border-color 0.2s;
-  }
-  .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
-  .form-select option { background: var(--surface); }
-  .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
-
-  /* HISTORY */
-  .history-list { margin-top: 16px; }
-  .history-item {
-    display: flex;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(42,63,82,0.5);
-    font-size: 13px;
-  }
-  .history-item:last-child { border-bottom: none; }
-  .history-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-top: 4px;
-    flex-shrink: 0;
-  }
-
-  /* ADD CHART TAB */
-  .add-form {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    max-width: 600px;
-  }
-
-  /* FILTER BAR */
-  .filter-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .filter-chip {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-muted);
-    font-family: 'Sarabun', sans-serif;
-    transition: all 0.2s;
-  }
-  .filter-chip:hover, .filter-chip.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,200,160,0.08);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 48px 20px;
-    color: var(--text-muted);
-  }
-  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
-
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* Notification toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 14px 20px;
-    font-size: 14px;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: var(--shadow);
-    transform: translateX(120%);
-    transition: transform 0.3s ease;
-  }
-  .toast.show { transform: translateX(0); }
-
-  @media (max-width: 700px) {
-    main { padding: 16px; }
-    .tabs { padding: 12px 16px 0; overflow-x: auto; }
-    header { padding: 12px 16px; }
-    .header-time { display: none; }
-    th:nth-child(4), td:nth-child(4),
-    th:nth-child(5), td:nth-child(5) { display: none; }
-  }
+/* modal */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  display:none;align-items:center;justify-content:center;
+}
+.modal.show{display:flex}
+.box{
+  background:#16202c;padding:20px;border-radius:10px;width:300px
+}
 </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">🏥</div>
-    <div>
-      <h1>Chart Tracker</h1>
-      <span>ระบบติดตามแฟ้มประวัติผู้ป่วย</span>
-    </div>
-  </div>
-  <div class="header-time" id="clock">--:--:--</div>
-</header>
+<h2>📋 Chart</h2>
 
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-  <button class="tab" onclick="switchTab('charts')">📋 รายการ Chart</button>
-  <button class="tab" onclick="switchTab('add')">➕ เพิ่ม Chart</button>
-</div>
+<input id="hn" placeholder="HN">
+<input id="name" placeholder="ชื่อ">
+<button onclick="add()">เพิ่ม</button>
 
-<main>
-  <!-- DASHBOARD PAGE -->
-  <div class="page active" id="page-dashboard">
-    <div class="dashboard-grid" id="stat-cards"></div>
+<table>
+<thead>
+<tr><th>HN</th><th>ชื่อ</th><th>จัดการ</th></tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
 
-    <div class="search-section">
-      <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">🔍 ค้นหา Chart</div>
-      <div class="search-row">
-        <input class="search-input" id="search-input" placeholder="พิมพ์ HN, ชื่อ-นามสกุล หรือ คำค้นหา..." oninput="doSearch()" />
-        <button class="btn btn-secondary" onclick="clearSearch()">✕ ล้าง</button>
-      </div>
-      <div id="search-results" style="margin-top:14px;"></div>
-    </div>
-  </div>
-
-  <!-- CHARTS LIST PAGE -->
-  <div class="page" id="page-charts">
-    <div class="filter-bar" id="filter-bar"></div>
-    <div class="table-section">
-      <div class="table-header">
-        <div class="table-title">รายการ Chart ทั้งหมด</div>
-        <div class="table-count" id="list-count"></div>
-      </div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>HN</th>
-              <th>ชื่อ-นามสกุล</th>
-              <th>สถานะ / ที่อยู่</th>
-              <th>อัพเดตล่าสุด</th>
-              <th>หมายเหตุ</th>
-              <th>จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="chart-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ADD CHART PAGE -->
-  <div class="page" id="page-add">
-    <div class="add-form">
-      <div style="font-size:18px;font-weight:700;margin-bottom:20px;">➕ เพิ่ม Chart ใหม่</div>
-      <div class="form-group">
-        <label class="form-label">HN (Hospital Number) *</label>
-        <input class="form-input" id="add-hn" placeholder="เช่น 0012345" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">ชื่อ-นามสกุล *</label>
-        <input class="form-input" id="add-name" placeholder="ชื่อ นามสกุล" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">สถานะเริ่มต้น *</label>
-        <select class="form-select" id="add-status">
-          <option value="">-- เลือกสถานะ --</option>
-          <option value="ward_general">ตึกสามัญ</option>
-          <option value="ward_special3">ตึกพิเศษชั้น 3</option>
-          <option value="ward_special4">ตึกพิเศษชั้น 4</option>
-          <option value="insurance">กลุ่มงานประกัน</option>
-          <option value="doctor_pending">หมอรอสรุป Chart</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">หมายเหตุ</label>
-        <input class="form-input" id="add-note" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" />
-      </div>
-      <div class="modal-actions" style="justify-content:flex-start;">
-        <button class="btn btn-primary" onclick="addChart()">✓ บันทึก Chart</button>
-        <button class="btn btn-secondary" onclick="clearAddForm()">↺ ล้างข้อมูล</button>
-      </div>
-    </div>
-  </div>
-</main>
-
-<!-- STATUS MODAL -->
-<div class="modal-overlay" id="status-modal">
-  <div class="modal">
-    <div class="modal-title">🔄 เปลี่ยนสถานะ Chart</div>
-    <div id="modal-chart-info" style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;"></div>
-    <div class="form-group">
-      <label class="form-label">สถานะใหม่</label>
-      <select class="form-select" id="modal-status">
-        <option value="ward_general">ตึกสามัญ</option>
-        <option value="ward_special3">ตึกพิเศษชั้น 3</option>
-        <option value="ward_special4">ตึกพิเศษชั้น 4</option>
-        <option value="insurance">กลุ่มงานประกัน</option>
-        <option value="doctor_pending">หมอรอสรุป Chart</option>
-        <option value="opd_borrowed">OPD ยืม Chart</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">หมายเหตุ</label>
-      <input class="form-input" id="modal-note" placeholder="ระบุหมายเหตุ (ถ้ามี)" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">📜 ประวัติการเปลี่ยนสถานะ</label>
-      <div class="history-list" id="modal-history"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="saveStatus()">✓ บันทึกสถานะ</button>
-    </div>
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="box">
+    <h3 style="color:#ef4444">🗑 ลบข้อมูล</h3>
+    <div id="info"></div>
+    <p style="color:#999">ลบแล้วกู้คืนไม่ได้</p>
+    <button onclick="closeModal()">ยกเลิก</button>
+    <button onclick="confirmDelete()" style="background:#ef4444;color:#fff">ลบ</button>
   </div>
 </div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">✓ บันทึกแล้ว</div>
 
 <script>
-// ==================== DATA ====================
-const STATUSES = {
-  ward_general:  { label: 'ตึกสามัญ',           color: '#60a5fa', bg: 'rgba(96,165,250,0.15)', icon: '🏢' },
-  ward_special3: { label: 'ตึกพิเศษชั้น 3',     color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', icon: '🏨' },
-  ward_special4: { label: 'ตึกพิเศษชั้น 4',     color: '#f472b6', bg: 'rgba(244,114,182,0.15)', icon: '🏩' },
-  insurance:     { label: 'กลุ่มงานประกัน',     color: '#fb923c', bg: 'rgba(251,146,60,0.15)',  icon: '📄' },
-  doctor_pending:{ label: 'หมอรอสรุป Chart',    color: '#facc15', bg: 'rgba(250,204,21,0.15)',  icon: '⏳' },
-  opd_borrowed:  { label: 'OPD ยืม Chart',      color: '#34d399', bg: 'rgba(52,211,153,0.15)',  icon: '📤' },
-};
+let charts = JSON.parse(localStorage.getItem('charts')||'[]');
+let delId=null;
 
-const STAT_CONFIG = [
-  { key: 'ward_general',   icon: '🏢', cardColor: '#60a5fa', sub: 'Ward ทั่วไป' },
-  { key: 'ward_special3',  icon: '🏨', cardColor: '#a78bfa', sub: 'ชั้น 3' },
-  { key: 'ward_special4',  icon: '🏩', cardColor: '#f472b6', sub: 'ชั้น 4' },
-  { key: 'insurance',      icon: '📄', cardColor: '#fb923c', sub: 'ประกัน' },
-  { key: 'doctor_pending', icon: '⏳', cardColor: '#facc15', sub: 'รอหมอสรุป' },
-  { key: 'opd_borrowed',   icon: '📤', cardColor: '#34d399', sub: 'OPD ยืม' },
-];
+function save(){localStorage.setItem('charts',JSON.stringify(charts));}
 
-let charts = JSON.parse(localStorage.getItem('charts') || '[]');
-let editingId = null;
-let currentFilter = 'all';
-
-// ==================== DEMO DATA ====================
-if (charts.length === 0) {
-  const demoData = [
-    { hn: '0012345', name: 'นางสาวสมใจ ใจดี', status: 'ward_general' },
-    { hn: '0023456', name: 'นายวิชัย มั่นคง', status: 'ward_special3' },
-    { hn: '0034567', name: 'นางสุดา รักดี', status: 'insurance' },
-    { hn: '0045678', name: 'เด็กชายปิยะ เก่งมาก', status: 'doctor_pending' },
-    { hn: '0056789', name: 'นายอานนท์ สุขใส', status: 'ward_special4' },
-    { hn: '0067890', name: 'นางมาลี สวยงาม', status: 'opd_borrowed' },
-    { hn: '0078901', name: 'นายธนา มีชัย', status: 'ward_general' },
-    { hn: '0089012', name: 'นางสาวนภา ฟ้าใส', status: 'ward_special3' },
-  ];
-  demoData.forEach(d => {
-    charts.push({
-      id: Date.now() + Math.random(),
-      hn: d.hn, name: d.name, status: d.status, note: '',
-      history: [{ status: d.status, note: 'เพิ่มเข้าระบบ', ts: new Date().toISOString() }]
-    });
-  });
-  saveData();
-}
-
-function saveData() {
-  localStorage.setItem('charts', JSON.stringify(charts));
-}
-
-function fmtTs(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
-function badge(status) {
-  const s = STATUSES[status];
-  if (!s) return '';
-  return `<span class="badge" style="color:${s.color};background:${s.bg}">
-    <span class="badge-dot" style="background:${s.color}"></span>${s.icon} ${s.label}
-  </span>`;
-}
-
-// ==================== CLOCK ====================
-function updateClock() {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('th-TH');
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ==================== TABS ====================
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const idx = ['dashboard','charts','add'].indexOf(name);
-  document.querySelectorAll('.tab')[idx].classList.add('active');
-  document.getElementById('page-' + name).classList.add('active');
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'charts') renderList();
-}
-
-// ==================== DASHBOARD ====================
-function renderDashboard() {
-  const counts = {};
-  STAT_CONFIG.forEach(s => counts[s.key] = 0);
-  charts.forEach(c => { if (counts[c.status] !== undefined) counts[c.status]++; });
-
-  const grid = document.getElementById('stat-cards');
-  grid.innerHTML = STAT_CONFIG.map(s => `
-    <div class="stat-card ${currentFilter === s.key ? 'active-filter' : ''}"
-         style="--card-color:${s.cardColor}"
-         onclick="filterBy('${s.key}')">
-      <div class="stat-icon">${s.icon}</div>
-      <div class="stat-label">${STATUSES[s.key].label}</div>
-      <div class="stat-num">${counts[s.key]}</div>
-      <div class="stat-sub">chart</div>
-    </div>
+function render(){
+  const el=document.getElementById('list');
+  el.innerHTML=charts.map(c=>`
+    <tr>
+      <td>${c.hn}</td>
+      <td>${c.name}</td>
+      <td>
+        <button class="delete" onclick="openDelete('${c.id}')">🗑 ลบ</button>
+      </td>
+    </tr>
   `).join('');
 }
 
-function filterBy(key) {
-  currentFilter = currentFilter === key ? 'all' : key;
-  renderDashboard();
-  switchTab('charts');
+function add(){
+  const hn=document.getElementById('hn').value;
+  const name=document.getElementById('name').value;
+  if(!hn||!name)return alert('กรอกก่อน');
+  charts.push({id:Date.now(),hn,name});
+  save(); render();
 }
 
-// ==================== LIST ====================
-function renderList() {
-  // filter chips
-  const fb = document.getElementById('filter-bar');
-  fb.innerHTML = `<button class="filter-chip ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">ทั้งหมด (${charts.length})</button>`
-    + STAT_CONFIG.map(s => {
-        const cnt = charts.filter(c => c.status === s.key).length;
-        return `<button class="filter-chip ${currentFilter===s.key?'active':''}" onclick="setFilter('${s.key}')">${s.icon} ${STATUSES[s.key].label} (${cnt})</button>`;
-      }).join('');
-
-  const filtered = currentFilter === 'all' ? charts : charts.filter(c => c.status === currentFilter);
-  document.getElementById('list-count').textContent = `${filtered.length} รายการ`;
-
-  const tbody = document.getElementById('chart-tbody');
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📭</div><div>ไม่พบ Chart</div></div></td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(c => {
-    const last = c.history[c.history.length - 1];
-    return `<tr>
-      <td><span class="hn">${c.hn}</span></td>
-      <td style="font-weight:500">${c.name}</td>
-      <td>${badge(c.status)}</td>
-      <td><span class="timestamp">${fmtTs(last.ts)}</span></td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:140px;">${c.note || '-'}</td>
-      <td>
-        <div class="actions">
-          <button class="action-btn" style="color:#00c8a0;border-color:rgba(0,200,160,0.4);background:rgba(0,200,160,0.08)"
-            onclick="openModal('${c.id}')">🔄 เปลี่ยนสถานะ</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+/* DELETE */
+function openDelete(id){
+  delId=id;
+  const c=charts.find(x=>x.id==id);
+  document.getElementById('info').innerHTML=`<b>${c.hn}</b> - ${c.name}`;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+function confirmDelete(){
+  charts=charts.filter(x=>x.id!=delId);
+  save(); render(); closeModal();
 }
 
-function setFilter(key) {
-  currentFilter = key;
-  renderList();
-}
-
-// ==================== MODAL ====================
-function openModal(id) {
-  editingId = id;
-  const c = charts.find(x => x.id == id);
-  if (!c) return;
-
-  document.getElementById('modal-chart-info').innerHTML = `
-    <div style="display:flex;gap:16px;align-items:center;">
-      <div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">HN</div>
-        <div class="hn" style="font-size:16px;">${c.hn}</div>
-      </div>
-      <div style="flex:1">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">ชื่อ-นามสกุล</div>
-        <div style="font-weight:600;">${c.name}</div>
-      </div>
-      <div>${badge(c.status)}</div>
-    </div>
-  `;
-
-  document.getElementById('modal-status').value = c.status;
-  document.getElementById('modal-note').value = '';
-
-  // history
-  const hist = [...c.history].reverse();
-  document.getElementById('modal-history').innerHTML = hist.length === 0
-    ? '<div style="color:var(--text-muted);font-size:13px;">ยังไม่มีประวัติ</div>'
-    : hist.map((h, i) => `
-      <div class="history-item">
-        <div class="history-dot" style="background:${i===0?'var(--accent)':'var(--border)'}"></div>
-        <div>
-          <div style="font-weight:600;">${badge(h.status)}</div>
-          ${h.note ? `<div style="color:var(--text-muted);font-size:12px;margin-top:3px;">📝 ${h.note}</div>` : ''}
-          <div class="timestamp" style="margin-top:4px;">${fmtTs(h.ts)}</div>
-        </div>
-      </div>
-    `).join('');
-
-  document.getElementById('status-modal').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('status-modal').classList.remove('open');
-  editingId = null;
-}
-
-function saveStatus() {
-  const c = charts.find(x => x.id == editingId);
-  if (!c) return;
-  const newStatus = document.getElementById('modal-status').value;
-  const note = document.getElementById('modal-note').value.trim();
-  c.status = newStatus;
-  c.note = note;
-  c.history.push({ status: newStatus, note, ts: new Date().toISOString() });
-  saveData();
-  closeModal();
-  renderList();
-  renderDashboard();
-  showToast(`✓ เปลี่ยนสถานะเป็น "${STATUSES[newStatus].label}" แล้ว`);
-}
-
-// ==================== ADD CHART ====================
-function addChart() {
-  const hn = document.getElementById('add-hn').value.trim();
-  const name = document.getElementById('add-name').value.trim();
-  const status = document.getElementById('add-status').value;
-  const note = document.getElementById('add-note').value.trim();
-
-  if (!hn || !name || !status) {
-    showToast('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน', true);
-    return;
-  }
-  if (charts.find(c => c.hn === hn)) {
-    showToast('⚠️ HN นี้มีอยู่ในระบบแล้ว', true);
-    return;
-  }
-
-  charts.push({
-    id: Date.now() + Math.random(),
-    hn, name, status, note,
-    history: [{ status, note: note || 'เพิ่มเข้าระบบ', ts: new Date().toISOString() }]
-  });
-  saveData();
-  clearAddForm();
-  showToast(`✓ เพิ่ม Chart HN: ${hn} แล้ว`);
-  setTimeout(() => switchTab('charts'), 500);
-}
-
-function clearAddForm() {
-  ['add-hn','add-name','add-status','add-note'].forEach(id => document.getElementById(id).value = '');
-}
-
-// ==================== SEARCH ====================
-function doSearch() {
-  const q = document.getElementById('search-input').value.trim().toLowerCase();
-  const res = document.getElementById('search-results');
-  if (!q) { res.innerHTML = ''; return; }
-
-  const found = charts.filter(c =>
-    c.hn.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
-  );
-
-  if (found.length === 0) {
-    res.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:12px 0;">ไม่พบ Chart ที่ค้นหา</div>`;
-    return;
-  }
-
-  res.innerHTML = `<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">พบ ${found.length} รายการ</div>` +
-    found.map(c => {
-      const last = c.history[c.history.length - 1];
-      return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
-        <div>
-          <div style="font-size:11px;color:var(--text-muted)">HN</div>
-          <div class="hn" style="font-size:15px">${c.hn}</div>
-        </div>
-        <div style="flex:1;min-width:120px;">
-          <div style="font-size:11px;color:var(--text-muted)">ชื่อ</div>
-          <div style="font-weight:600">${c.name}</div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">สถานะปัจจุบัน</div>
-          ${badge(c.status)}
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--text-muted)">อัพเดต</div>
-          <div class="timestamp">${fmtTs(last.ts)}</div>
-        </div>
-        <button class="btn btn-secondary" style="font-size:12px;padding:7px 12px" onclick="openModal('${c.id}')">🔄 เปลี่ยนสถานะ</button>
-      </div>`;
-    }).join('');
-}
-
-function clearSearch() {
-  document.getElementById('search-input').value = '';
-  document.getElementById('search-results').innerHTML = '';
-}
-
-// ==================== TOAST ====================
-function showToast(msg, isWarn = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.borderColor = isWarn ? 'var(--warn)' : 'var(--accent)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ==================== INIT ====================
-renderDashboard();
-renderList();
-
-// Close modal on overlay click
-document.getElementById('status-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+render();
 </script>
+
 </body>
 </html>
