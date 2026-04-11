@@ -526,7 +526,26 @@ function showToast(msg, isWarn = false, isDanger = false) {
 document.getElementById('status-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 document.getElementById('confirm-modal').addEventListener('click', function(e) { if (e.target === this) closeConfirm(); });
 
+
 loadData();
+
+setInterval(async () => {
+  try {
+    const result = await window.storage.get(STORAGE_KEY, true);
+    const latest = result ? JSON.parse(result.value) : [];
+
+    if (JSON.stringify(latest) !== JSON.stringify(charts)) {
+      charts = latest;
+      renderDashboard();
+      renderList();
+      doSearch();
+      showToast('🔄 มีการอัปเดตข้อมูลใหม่');
+    }
+  } catch (e) {
+    console.error('Realtime sync failed:', e);
+  }
+}, 2000);
+
 </script>
 </body>
 </html>
